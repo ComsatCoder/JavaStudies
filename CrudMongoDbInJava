@@ -1,0 +1,147 @@
+package com.satcoder;
+
+import com.mongodb.*;
+import java.net.UnknownHostException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+public class Main {
+
+    private static Mongo mongo;
+    private static DB db;
+    private static DBCollection collection;
+    public static void main(String[] args) {
+        InitializeDatabase("localhost", 27017);
+
+        SwitchDB("MongoDBase");
+
+        SwitchCollection("MongoDBCrud");
+
+        ShowContentInDocument();
+
+        InsertTest();
+
+        ShowContentInDocument();
+
+        UpdateTest();
+
+        ReadTest();
+
+        RemoveTest();
+
+        ShowContentInDocument();
+
+        DeleteAll();
+
+        ShowContentInDocument();
+
+
+    }
+
+    private static void InitializeDatabase(String host, int port) {
+        System.out.println("Initialize database....");
+        try {
+            mongo = new Mongo(host, port);
+        } catch (UnknownHostException ex) {
+            Logger.getLogger(Main.class.getName())
+                    .log(Level.SEVERE, null, ex);
+        }
+    }
+    private static void SwitchDB(String dbname) {
+        if (mongo != null) {
+            System.out.println("switch database..");
+            db = mongo.getDB(dbname);
+        }
+
+    }
+
+    private static void SwitchCollection(String collectionName) {
+        if (db != null) {
+            System.out.println("Switch Collection...");
+            collection = db.getCollection(collectionName);
+        }
+    }
+
+
+
+    private static void ShowContentInDocument() {
+        System.out.println("");
+        System.out.println("Show content of document...");
+            DBCursor cursor = collection.find();
+             while(cursor.hasNext()) {
+                 System.out.println(cursor.next());
+        }
+    }
+    private static void InsertTest() {
+        BasicDBObject document = new BasicDBObject();
+            document.put("username", "Peter");
+            document.put("password", "hphqpokgy231");
+            Insert(document);
+    }
+
+    private static void UpdateTest() {
+        BasicDBObject document = new BasicDBObject();
+            document.put("$set", new BasicDBObject().append("password", "NewPassword"));
+            Update(document, "username", "peter");
+    }
+
+    private static void ReadTest() {
+        BasicDBObject document = new BasicDBObject();
+            document.put("username", "peter");
+            Read(document);
+    }
+
+    private static void RemoveTest() {
+        BasicDBObject document = new BasicDBObject();
+        document.put("username", "peter");
+        Remove(document);
+    }
+    private static void Remove(BasicDBObject document) {
+        System.out.println("");
+        System.out.println("Remove user...");
+        if (document != null) {
+            collection.remove(document);
+        }
+    }
+    private static void DeleteAll() {
+        System.out.println("");
+        System.out.println("Delete All.....");
+        DBCursor cursor = collection.find();
+        while (cursor.hasNext()) {
+            collection.remove(cursor.next());
+        }
+    }
+
+
+
+    private static void Insert(BasicDBObject document) {
+        System.out.println("");
+        System.out.println("Inserting...");
+        if (db != null) {
+            if (document != null) ;
+            collection.insert(document);
+
+
+        }
+    }
+    private static void Read(BasicDBObject document) {
+        System.out.println("");
+        System.out.println("Reading User Data......");
+        if (document != null) {
+            DBCursor cursor = collection.find(document);
+            while (cursor.hasNext()) {
+                System.out.println(cursor.next());
+
+
+            }
+        }
+    }
+    private static void Update(BasicDBObject document, String identifierKey, String identifierValue) {
+        System.out.println("");
+        System.out.println("Updating user..");
+        if(document != null) {
+            BasicDBObject searQuery = new BasicDBObject().append(identifierKey,identifierValue);
+            collection.update(searQuery,document);
+        }
+    }
+}
