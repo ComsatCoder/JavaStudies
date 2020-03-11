@@ -1,0 +1,152 @@
+package com.satcoder;
+
+import com.mongodb.*;
+
+import java.net.UnknownHostException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+public class Main {
+
+    private static Mongo mongo;
+    private static DB db;
+    private static DBCollection dbCollection;
+
+    public static void main(String[] args) {
+        InitializeDatabase("localhost", 27017);
+
+        SwitchDB("MongoDbInJava");
+
+        SwitchCollection("users");
+
+
+
+        ShowContentInDocument();
+
+        InsertAccount();
+
+        ShowContentInDocument();
+
+        UpdateAccount();
+
+        ReadAccountData();
+
+        RemoveAccount();
+
+        ShowContentInDocument();
+
+        DeleteAccount();
+
+        ShowContentInDocument();
+
+
+    }
+
+
+    private static void InitializeDatabase(String host, int port) {
+        System.out.println("Initialize Database..");
+        try {
+            mongo = new Mongo(host, port);
+        } catch (UnknownHostException ex) {
+            Logger.getLogger(Main.class.getName())
+                    .log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private static void SwitchDB(String dbname) {
+        if (mongo != null) {
+            System.out.println("switch database..");
+            db = mongo.getDB(dbname);
+        }
+    }
+
+    private static void SwitchCollection(String collectionName) {
+        if (db != null) {
+            System.out.println("switch collection");
+            dbCollection = db.getCollection(collectionName);
+        }
+    }
+
+    private static void ShowContentInDocument() {
+        System.out.println("");
+        System.out.println("Showing Content of Documents");
+
+        DBCursor cursor = dbCollection.find();
+        while (cursor.hasNext()) {
+            System.out.println(cursor.next());
+
+        }
+    }
+
+    private static void InsertAccount() {
+        System.out.println("");
+        BasicDBObject document = new BasicDBObject();
+        document.put("username", "Waveshock");
+        document.put("password", "hpjqpokgy231");
+        Insert(document);
+    }
+
+    private static void UpdateAccount() {
+        BasicDBObject document = new BasicDBObject();
+        document.put("$set", new BasicDBObject().append("Password", "NewPassword"));
+        Update(document, "username", "Waveshock");
+    }
+
+    private static void ReadAccountData() {
+        BasicDBObject document = new BasicDBObject();
+        document.put("username", "peter");
+        Read(document);
+    }
+
+    private static void RemoveAccount() {
+        BasicDBObject document = new BasicDBObject();
+        document.put("username", "peter");
+        Remove(document);
+    }
+
+    private static void DeleteAccount() {
+        System.out.println("");
+        System.out.println("Delete All.....");
+        DBCursor cursor = dbCollection.find();
+        while (cursor.hasNext()) {
+            dbCollection.remove(cursor.next());
+        }
+    }
+
+
+    private static void Insert(BasicDBObject document) {
+        System.out.println("Insert");
+        if (db != null) {
+            if (document != null) ;
+            dbCollection.insert(document);
+        }
+    }
+    private static void Update(BasicDBObject document, String identifierKey, String identifierValue) {
+        System.out.println("");
+        System.out.println("Updating user..");
+        if(document != null) {
+            BasicDBObject searhQuery = new BasicDBObject().append(identifierKey,identifierValue);
+            dbCollection.update(searhQuery, document);
+        }
+    }
+
+
+    private static void Read(BasicDBObject document) {
+        System.out.println("");
+        System.out.println("Reading User Data......");
+        if (document != null) {
+            DBCursor cursor = dbCollection.find(document);
+            while (cursor.hasNext()) {
+                System.out.println(cursor.next());
+            }
+        }
+    }
+
+    private static void Remove(BasicDBObject document) {
+        System.out.println("");
+        System.out.println("Remove user...");
+        if (document != null) {
+            dbCollection.remove(document);
+        }
+    }
+}
